@@ -43,7 +43,7 @@ async function handleLogout() {
         method: 'POST',
         credentials: 'include'
     });
-    window.location.href = 'index.html'; //pake link form login
+    window.location.href = 'https://login-with-agio.web.app/'; //pake link form login
 }
 
 // Load profile when page loads
