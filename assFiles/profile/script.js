@@ -39,7 +39,7 @@ async function loadProfile() {
 }
 
 async function handleLogout() {
-    await fetch('https://verifi-kasi-bck.vercel.app/logout', {
+    await fetch('https://verifi-kasi-bck.vercel.app/api/logout', {
         method: 'POST',
         credentials: 'include'
     });
