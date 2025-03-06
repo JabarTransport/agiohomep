@@ -5,29 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - AGIO AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <header class="bg-white shadow-sm">
         <nav class="max-w-6xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
-                <a href="/" class="text-xl font-bold text-blue-600">AGIO AI</a>
-                <button onclick="handleLogout()" class="text-gray-600 hover:text-blue-600">
-                    Logout
-                </button>
+                <a href="homen.html" class="text-xl font-bold text-blue-600">AGIO AI</a>
+                <button onclick="handleLogout()" class="text-gray-600 hover:text-blue-600">Logout</button>
             </div>
         </nav>
     </header>
 
     <main class="max-w-2xl mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div id="profileContent">
-                <!-- Profile data will be loaded here -->
-            </div>
+        <div class="bg-white rounded-lg shadow-md p-6" id="profileContent">
+            <!-- Profile data akan di-load disini -->
         </div>
     </main>
 
-    <script src="assFiles/profile/script.js"></script>
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
+  authDomain: "login-agio.firebaseapp.com",
+  projectId: "login-agio",
+  storageBucket: "login-agio.firebasestorage.app",
+  messagingSenderId: "1089500143018",
+  appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
+  measurementId: "G-WQT0VC0EBE"
+};
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const authMethod = localStorage.getItem('agio-auth');
+            if(!authMethod) window.location.href = "https://login-with-agio.web.app/";
+
+            if(authMethod === 'firebase') {
+                auth.onAuthStateChanged(user => {
+                    if(user) {
+                        document.getElementById('profileContent').innerHTML = `
+                            <div class="text-center">
+                                <img src="${user.photoURL}" class="w-32 h-32 rounded-full mx-auto mb-4">
+                                <h2 class="text-2xl font-bold">${user.displayName}</h2>
+                                <p class="text-gray-600">${user.email}</p>
+                            </div>
+                        `;
+                    }
+                });
+            } else {
+                document.getElementById('profileContent').innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold">Keyword User</h2>
+                        <p class="text-gray-600">Logged in via secret keyword</p>
+                    </div>
+                `;
+            }
+        });
+
+        async function handleLogout() {
+           try {
+                if(localStorage.getItem('agio-auth') === 'firebase') {
+                    await auth.signOut();
+                }
+                localStorage.removeItem('agio-auth');
+                window.location.href = "https://login-with-agio.web.app/";
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+        }
+    </script>
 </body>
 </html>
