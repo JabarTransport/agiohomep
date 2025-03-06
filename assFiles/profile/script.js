@@ -1,35 +1,41 @@
-async function loadProfile() {
-    const sessionId = localStorage.getItem('sessionId');
-    if (!sessionId) {
-        window.location.href = 'https://login-with-agio.web.app/';
-        return;
-    }
+// Firebase Configuration (sama dengan di login page)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
+            authDomain: "login-agio.firebaseapp.com",
+            projectId: "login-agio",
+            storageBucket: "login-agio.firebasestorage.app",
+            messagingSenderId: "1089500143018",
+            appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
+            measurementId: "G-WQT0VC0EBE"
+  
+        };
 
-    const response = await fetch(`https://verifi-kasi-bck.vercel.app/api/profile?sessionId=${sessionId}`);
-    const data = await response.json();
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-    let html = '';
-    if (data.type === 'github') {
-        html = `
-            <img src="${data.data.avatar_url}" class="w-24 h-24 rounded-full">
-            <h2>${data.data.name}</h2>
-            <p>@${data.data.login}</p>
-        `;
-    } else {
-        html = `
-            <img src="${data.data.avatar_url}" class="w-24 h-24 rounded-full">
-            <h2>${data.data.name}</h2>
-            <p>${data.data.message}</p>
-        `;
-    }
+        // Load Profile Data
+        auth.onAuthStateChanged((user) => {
+            const profileContent = document.getElementById('profileContent');
+            
+            if(user) {
+                profileContent.innerHTML = `
+                    <div class="text-center">
+                        <img src="${user.photoURL || 'default-avatar.png'}" 
+                            class="w-32 h-32 rounded-full mx-auto mb-4"
+                            alt="Profile">
+                        <h2 class="text-2xl font-bold mb-2">${user.displayName || 'User'}</h2>
+                        <p class="text-gray-600">${user.email || ''}</p>
+                    </div>
+                `;
+            } else {
+                window.location.href = "https://login-with-agio.web.app/";
+            }
+        });
 
-    document.getElementById('profileContent').innerHTML = html;
-}
-
-function logout() {
-    const sessionId = localStorage.getItem('sessionId');
-    fetch(`https://verifi-kasi-bck.vercel.app/api/logout?sessionId=${sessionId}`).then(() => {
-        localStorage.removeItem('sessionId');
-        window.location.href = 'https://login-with-agio.web.app/';
-    });
-}
+        // Logout Handler
+        function handleLogout() {
+            auth.signOut().then(() => {
+                window.location.href = "https://login-with-agio.web.app/";
+            });
+        }
