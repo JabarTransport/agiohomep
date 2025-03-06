@@ -18,13 +18,8 @@
         auth.onAuthStateChanged((user) => {
             if (!user) {
                 // Redirect ke Firebase Hosting jika belum login
-                window.location.href = "https://login-with-agio.web.app/";
+                window.location.href = "";
             }
         });
 
-        // Logout Handler
-        function handleLogout() {
-            auth.signOut().then(() => {
-                window.location.href = "https://login-with-agio.web.app/";
-            });
-        }
+        
