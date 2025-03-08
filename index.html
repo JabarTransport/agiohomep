@@ -4,10 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home - AGIO AI</title>
+  <title>Agio AI - Modern Chatbot</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assFiles/utama/gaya.css">
@@ -26,6 +24,7 @@
         <a href="#features" class="text-gray-700 hover:text-blue-600 transition-colors">Features</a>
         <a href="#pipeline" class="text-gray-700 hover:text-blue-600 transition-colors">How It Works</a>
         <a href="profile.html" class="btn-primary px-6 py-2 rounded-full">Profile</a>
+        <button onclick="handleLogout()" class="text-gray-600 hover:text-blue-600">Logout</button>
       </nav>
       <button id="mobile-menu-btn" class="lg:hidden text-gray-700">
         <i class="fas fa-bars text-2xl"></i>
@@ -40,6 +39,7 @@
       <a href="#features" class="py-3 text-gray-700 hover:bg-gray-50">Features</a>
       <a href="#pipeline" class="py-3 text-gray-700 hover:bg-gray-50">How It Works</a>
       <a href="profile.html" class="py-3 text-blue-600 hover:bg-blue-50">Profile</a>
+      <button onclick="handleLogout()" class="py-3 text-gray-600 hover:bg-gray-50">Logout</button>
       
     </div>
   </div>
