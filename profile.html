@@ -7,12 +7,13 @@
   <meta name="author" content="AGIO AI Team" />
   <title>Profile - AGIO AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK versi 9.22.0 -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
     .gradient-text {
-      background: linear-gradient(45deg, #2563eb, #1d4ed8);
+      background: linear-gradient(#181a1e, #1d4ed8);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -23,11 +24,9 @@
   <!-- Header -->
   <header class="bg-white shadow-sm fixed w-full z-50">
     <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="/" class="text-xl font-bold text-blue-600">AGIO AI</a>
+      <a href="" class="text-xl font-bold text-blue-600">AGIO AI</a>
       <div class="hidden md:flex space-x-8 items-center">
-        <a href="#overview" class="text-gray-700 hover:text-blue-600 transition-colors">Overview</a>
-        <a href="#features" class="text-gray-700 hover:text-blue-600 transition-colors">Features</a>
-        <a href="#pipeline" class="text-gray-700 hover:text-blue-600 transition-colors">How It Works</a>
+        
         <button onclick="handleLogout()" class="text-gray-600 hover:text-blue-600">Logout</button>
       </div>
       <button id="mobile-menu-btn" class="md:hidden text-gray-600">
@@ -38,10 +37,7 @@
 
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden fixed w-full bg-white z-40 top-16 py-4 shadow-lg">
-    <div class="flex flex-col text-center space-y-4">
-      <a href="#overview" class="py-3 text-gray-700 hover:bg-gray-50">Overview</a>
-      <a href="#features" class="py-3 text-gray-700 hover:bg-gray-50">Features</a>
-      <a href="#pipeline" class="py-3 text-gray-700 hover:bg-gray-50">How It Works</a>
+    
       <button onclick="handleLogout()" class="py-3 text-gray-600 hover:bg-gray-50">Logout</button>
     </div>
   </div>
@@ -50,23 +46,23 @@
   <main class="max-w-2xl mx-auto px-4 py-20 mt-16">
     <div class="bg-white rounded-lg shadow-md p-6">
       <div id="profileContent">
-        <!-- Data profil akan tampil di sini -->
+        <!-- Data profil akan ditampilkan di sini -->
       </div>
     </div>
   </main>
 
+  <!-- Script JS Profile -->
   <script>
     // Konfigurasi Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
-        authDomain: "login-agio.firebaseapp.com",
-        projectId: "login-agio",
-        storageBucket: "login-agio.firebasestorage.app",
-        messagingSenderId: "1089500143018",
-        appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
-        measurementId: "G-WQT0VC0EBE"
-      };
-
+      apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
+      authDomain: "login-agio.firebaseapp.com",
+      projectId: "login-agio",
+      storageBucket: "login-agio.firebasestorage.app",
+      messagingSenderId: "1089500143018",
+      appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
+      measurementId: "G-WQT0VC0EBE"
+    };
     // Inisialisasi Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -79,6 +75,7 @@
       if (!isLoggedIn || (loginTime && now - loginTime > 3600000)) {
         handleLogout();
       } else {
+        // Render data profil jika user sudah login
         auth.onAuthStateChanged((user) => {
           if (user) {
             document.getElementById('profileContent').innerHTML = `
@@ -98,7 +95,8 @@
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('loginTime');
       auth.signOut();
-      window.location.href = "https://login-with-agio.web.app/";
+      // Redirect ke halaman login
+      window.location.href = "https://login-with-agio.web.app";
     }
 
     // Toggle Mobile Menu
@@ -106,6 +104,8 @@
       const mobileMenu = document.getElementById('mobile-menu');
       mobileMenu.classList.toggle('hidden');
     });
+
+    window.handleLogout = handleLogout;
   </script>
 </body>
 </html>
