@@ -1,84 +1,118 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - AGIO AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - AGIO</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="bg-white shadow-sm fixed w-full z-50">
-        <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="#" class="text-xl font-bold text-blue-600">AGIO AI</a>
-            <button onclick="handleLogout()" 
-                class="px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">
-                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-            </button>
-        </nav>
-    </header>
+<body class="min-h-screen bg-gray-900 text-white">
+  <nav class="bg-gray-800/80 backdrop-blur-md py-4 fixed w-full top-0">
+    <div class="container mx-auto px-6 flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <img src="logo/logos.png" alt="Logo" class="h-8">
+        <span class="text-xl font-bold">AGIO AI</span>
+      </div>
+      <div class="space-x-4">
+        <a href="index.html" class="hover:text-blue-400 transition-colors">Home</a>
+        <button 
+          onclick="logout()"
+          class="px-4 py-2 bg-red-500/90 hover:bg-red-600 rounded-lg transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
 
-    <main class="max-w-2xl mx-auto px-4 py-24">
-        <div class="bg-white rounded-xl shadow-md p-8">
-            <div id="profileContent" class="space-y-6">
-                <!-- Profile content will be loaded here -->
-            </div>
+  <main class="container mx-auto px-6 pt-24 pb-12 max-w-2xl">
+    <div class="gradient-card rounded-xl p-8 shadow-xl">
+      <h1 class="text-3xl font-bold mb-8 text-center">User Profile</h1>
+      
+      <div class="space-y-6">
+        <div class="flex items-center space-x-6">
+          <img 
+            id="profileAvatar"
+            src="https://i.ibb.co/3TQ6D7R/agio-logo.png" 
+            class="w-32 h-32 rounded-full border-4 border-blue-400/50"
+            alt="Profile"
+          >
+          <div>
+            <h2 id="profileName" class="text-2xl font-bold"></h2>
+            <p id="profileEmail" class="text-gray-300"></p>
+          </div>
         </div>
-    </main>
 
-    <script>
-       // Fungsi untuk menampilkan profil
-function loadProfile() {
-    const profileContent = document.getElementById('profileContent');
-    const userProfile = JSON.parse(localStorage.getItem('userProfile'));
-    const loginMethod = localStorage.getItem('loginMethod');
+        <div class="space-y-4">
+          <div class="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
+            <span>Account Type</span>
+            <span id="accountType" class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full"></span>
+          </div>
+          
+          <div class="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
+            <span>Last Login</span>
+            <span id="lastLogin"></span>
+          </div>
+          
+          <div class="flex justify-between items-center p-4 bg-gray-800/50 rounded-lg">
+            <span>Status</span>
+            <span id="accountStatus" class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 
-    // Jika tidak ada data profil, redirect ke halaman login
-    if (!userProfile) {
+  <script>
+    const firebaseConfig = { /* Same as before */ };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const loadProfile = async () => {
+      const urlParams = new URLSearchParams(location.search);
+      const token = urlParams.get('token');
+      const method = urlParams.get('method');
+
+      try {
+        if (method === 'github') {
+          await auth.signInWithCustomToken(token);
+          const user = auth.currentUser;
+          
+          document.getElementById('profileName').textContent = user.displayName || 'AGIO User';
+          document.getElementById('profileEmail').textContent = user.email;
+          document.getElementById('accountType').textContent = 'GitHub Account';
+          document.getElementById('accountStatus').textContent = user.emailVerified ? 'Verified' : 'Unverified';
+          document.getElementById('lastLogin').textContent = new Date(user.metadata.lastSignInTime).toLocaleString();
+          
+          if(user.photoURL) {
+            document.getElementById('profileAvatar').src = user.photoURL;
+          }
+        } else if (method === 'keyword') {
+          const tokenData = JSON.parse(atob(token));
+          
+          document.getElementById('profileName').textContent = 'Premium Member';
+          document.getElementById('profileEmail').textContent = 'Key-based Access';
+          document.getElementById('accountType').textContent = 'Secret Key';
+          document.getElementById('accountStatus').textContent = 'Active';
+          document.getElementById('lastLogin').textContent = new Date(tokenData.timestamp).toLocaleString();
+        }
+        
+        window.history.replaceState({}, '', 'profile.html');
+      } catch (error) {
+        console.error(error);
         window.location.href = 'https://login-with-agio.web.app';
-        return;
-    }
+      }
+    };
 
-    let profileHTML = `
-        <div class="text-center">
-            <img src="${userProfile.photoURL}" 
-                 alt="Profile Picture" 
-                 class="w-32 h-32 rounded-full mx-auto mb-6">
-            <h2 class="text-3xl font-bold text-gray-800">${userProfile.displayName}</h2>
-            <p class="text-gray-600 mt-2">
-                <i class="fas fa-envelope mr-2"></i>${userProfile.email}
-            </p>
-            <p class="text-gray-600 mt-2">
-                <i class="fas fa-sign-in-alt mr-2"></i>Logged in with ${loginMethod === 'github' ? 'GitHub' : 'Keyword'}
-            </p>
-        </div>
-    `;
+    const logout = () => {
+      auth.signOut();
+      window.location.href = 'https://login-with-agio.web.app';
+    };
 
-    profileContent.innerHTML = profileHTML;
-}
-
-// Fungsi Logout
-function handleLogout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('loginTime');
-    localStorage.removeItem('loginMethod');
-    localStorage.removeItem('userProfile');
-    window.location.href = 'https://login-with-agio.web.app';
-}
-
-// Cek session saat halaman dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const loginTime = localStorage.getItem('loginTime');
-    
-    // Jika tidak ada session atau session sudah kadaluarsa, redirect ke login
-    if (!isLoggedIn || (loginTime && Date.now() - loginTime > 3600000)) {
-        handleLogout();
-    } else {
-        loadProfile();
-    }
-});
-    </script>
+    loadProfile();
+  </script>
 </body>
 </html>
