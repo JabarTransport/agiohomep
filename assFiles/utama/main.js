@@ -25,19 +25,7 @@ window.addEventListener('scroll', () => {
     header.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
   }
 });
-// Fungsi Logout
-function handleLogout() {
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("loginTime");
-  auth.signOut().then(() => {
-    window.location.href = "https://login-with-agio.web.app";
-  }).catch((error) => {
-    console.error("Logout error:", error);
-    window.location.href = "https://login-with-agio.web.app";
-  });
-}
-// Agar fungsi logout dapat dipanggil dari elemen HTML
-window.handleLogout = handleLogout;
+
 
 // Konfigurasi Firebase
     const firebaseConfig = {
@@ -53,12 +41,41 @@ window.handleLogout = handleLogout;
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Cek status login dan validasi masa aktif (contoh: 1 jam)
-    document.addEventListener('DOMContentLoaded', () => {
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-      const loginTime = localStorage.getItem('loginTime');
-      const now = new Date().getTime();
-      if (!isLoggedIn || (loginTime && now - loginTime > 3600000)) {
-        handleLogout();
+    const validateSession = async () => {
+      const urlParams = new URLSearchParams(location.search);
+      const token = urlParams.get('token');
+      const method = urlParams.get('method');
+
+      if (!token || !method) {
+        window.location.href = 'https://login-with-agio.web.app';
+        return;
       }
-    });
+
+      try {
+        if (method === 'github') {
+          await auth.signInWithCustomToken(token);
+          const user = auth.currentUser;
+          document.getElementById('userName').textContent = user.displayName || 'AGIO User';
+          document.getElementById('userEmail').textContent = user.email;
+          if(user.photoURL) document.getElementById('userAvatar').src = user.photoURL;
+        } else if (method === 'keyword') {
+          const tokenData = JSON.parse(atob(token));
+          if(Date.now() > tokenData.exp) throw new Error('Session expired');
+          
+          document.getElementById('userName').textContent = 'Premium Member';
+          document.getElementById('userEmail').textContent = 'Key-based Access';
+        }
+        
+        window.history.replaceState({}, '', '/');
+      } catch (error) {
+        console.error(error);
+        window.location.href = 'https://login-with-agio.web.app';
+      }
+    };
+
+    const logout = () => {
+      auth.signOut();
+      window.location.href = 'https://login-agio.firebaseapp.com';
+    };
+
+    validateSession();
