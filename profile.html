@@ -1,117 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AGIO AI Profile" />
-  <meta name="author" content="AGIO AI Team" />
-  <title>Profile - AGIO AI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase SDK versi 9.22.0 -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    .gradient-text {
-      background: linear-gradient(#181a1e, #1d4ed8);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AGIO AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <!-- Header -->
-  <header class="bg-white shadow-sm fixed w-full z-50">
-    <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="" class="text-xl font-bold text-blue-600">AGIO AI</a>
-      <div class="hidden md:flex space-x-8 items-center">
-        
-        <button onclick="handleLogout()" class="text-gray-600 hover:text-blue-600">Logout</button>
-      </div>
-      <button id="mobile-menu-btn" class="md:hidden text-gray-600">
-        <i class="fas fa-bars text-2xl"></i>
-      </button>
-    </nav>
-  </header>
+    <header class="bg-white shadow-sm fixed w-full z-50">
+        <nav class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-blue-600">AGIO AI</a>
+            <button onclick="handleLogout()" 
+                class="px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </nav>
+    </header>
 
-  <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden fixed w-full bg-white z-40 top-16 py-4 shadow-lg">
-    
-      <button onclick="handleLogout()" class="py-3 text-gray-600 hover:bg-gray-50">Logout</button>
-    </div>
-  </div>
+    <main class="max-w-2xl mx-auto px-4 py-24">
+        <div class="bg-white rounded-xl shadow-md p-8">
+            <div id="profileContent" class="space-y-6">
+                <!-- Profile content will be loaded here -->
+            </div>
+        </div>
+    </main>
 
-  <!-- Profile Content -->
-  <main class="max-w-2xl mx-auto px-4 py-20 mt-16">
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <div id="profileContent">
-        <!-- Data profil akan ditampilkan di sini -->
-      </div>
-    </div>
-  </main>
+    <script>
+        // Fungsi untuk menampilkan profil
+        function loadProfile() {
+            const profileContent = document.getElementById('profileContent');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile'));
+            const loginMethod = localStorage.getItem('loginMethod');
 
-  <!-- Script JS Profile -->
-  <script>
-    // Profile Page Script
-const firebaseConfig = {
-  apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
-  authDomain: "login-agio.firebaseapp.com",
-  projectId: "login-agio",
-  storageBucket: "login-agio.firebasestorage.app",
-  messagingSenderId: "1089500143018",
-  appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
-  measurementId: "G-WQT0VC0EBE"
-};
+            if (!userProfile) {
+                window.location.href = 'https://login-with-agio.web.app';
+                return;
+            }
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+            let profileHTML = `
+                <div class="text-center">
+                    <img src="${userProfile.photoURL}" 
+                         alt="Profile Picture" 
+                         class="w-32 h-32 rounded-full mx-auto mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">${userProfile.displayName}</h2>
+                    <p class="text-gray-600 mt-2">
+                        <i class="fas fa-envelope mr-2"></i>${userProfile.email}
+                    </p>
+                    <p class="text-gray-600 mt-2">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Logged in with ${loginMethod === 'github' ? 'GitHub' : 'Keyword'}
+                    </p>
+                </div>
+            `;
 
-document.addEventListener("DOMContentLoaded", () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const loginTime = localStorage.getItem("loginTime");
-  const now = new Date().getTime();
-  if (!isLoggedIn || (loginTime && now - loginTime > 3600000)) {
-    handleLogout();
-  } else {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        document.getElementById("profileContent").innerHTML = `
-          <div class="text-center">
-            <img src="${user.photoURL}" alt="Foto Profil" class="w-32 h-32 rounded-full mx-auto mb-4">
-            <h2 class="text-2xl font-bold">${user.displayName}</h2>
-            <p class="text-gray-600">${user.email}</p>
-          </div>
-        `;
-      } else {
-        document.getElementById("profileContent").innerHTML = `
-          <div class="text-center">
-            <h2 class="text-2xl font-bold">Selamat datang di AGIO AI</h2>
-            <p class="text-gray-600">Anda login menggunakan secret keyword.</p>
-          </div>
-        `;
-      }
-    });
-  }
-});
+            profileContent.innerHTML = profileHTML;
+        }
 
-function handleLogout() {
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("loginTime");
-  auth.signOut().then(() => {
-    window.location.href = "https://login-with-agio.web.app";
-  }).catch((error) => {
-    console.error("Logout error:", error);
-    window.location.href = "https://login-with-agio.web.app";
-  });
-}
+        // Fungsi Logout
+        function handleLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('loginTime');
+            localStorage.removeItem('loginMethod');
+            localStorage.removeItem('userProfile');
+            window.location.href = 'https://login-with-agio.web.app';
+        }
 
-document.getElementById("mobile-menu-btn").addEventListener("click", () => {
-  const mobileMenu = document.getElementById("mobile-menu");
-  mobileMenu.classList.toggle("hidden");
-});
-
-window.handleLogout = handleLogout;
-  </script>
+        // Cek session saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const loginTime = localStorage.getItem('loginTime');
+            
+            if (!isLoggedIn || (loginTime && Date.now() - loginTime > 3600000)) {
+                handleLogout();
+            } else {
+                loadProfile();
+            }
+        });
+    </script>
 </body>
 </html>
