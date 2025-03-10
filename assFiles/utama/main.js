@@ -27,11 +27,14 @@ window.addEventListener('scroll', () => {
 });
 // Fungsi Logout
 function handleLogout() {
-  localStorage.removeItem('isLoggedIn');
-  localStorage.removeItem('loginTime');
-  auth.signOut();
-  // Redirect ke halaman login
-  window.location.href = "https://login-with-agio.web.app";
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("loginTime");
+  auth.signOut().then(() => {
+    window.location.href = "https://login-with-agio.web.app";
+  }).catch((error) => {
+    console.error("Logout error:", error);
+    window.location.href = "https://login-with-agio.web.app";
+  });
 }
 // Agar fungsi logout dapat dipanggil dari elemen HTML
 window.handleLogout = handleLogout;
