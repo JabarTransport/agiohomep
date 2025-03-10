@@ -1,56 +1,51 @@
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyABCDEFGHIJKL1234567890_1234567890",
-    authDomain: "login-agio.web.app",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abc123def456abc789def"
-};
+// Fungsi untuk menampilkan profil
+function loadProfile() {
+    const profileContent = document.getElementById('profileContent');
+    const userProfile = JSON.parse(localStorage.getItem('userProfile'));
+    const loginMethod = localStorage.getItem('loginMethod');
 
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+    // Jika tidak ada data profil, redirect ke halaman login
+    if (!userProfile) {
+        window.location.href = 'https://login-with-agio.web.app';
+        return;
+    }
 
-// Periksa status login saat halaman dimuat
+    let profileHTML = `
+        <div class="text-center">
+            <img src="${userProfile.photoURL}" 
+                 alt="Profile Picture" 
+                 class="w-32 h-32 rounded-full mx-auto mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">${userProfile.displayName}</h2>
+            <p class="text-gray-600 mt-2">
+                <i class="fas fa-envelope mr-2"></i>${userProfile.email}
+            </p>
+            <p class="text-gray-600 mt-2">
+                <i class="fas fa-sign-in-alt mr-2"></i>Logged in with ${loginMethod === 'github' ? 'GitHub' : 'Keyword'}
+            </p>
+        </div>
+    `;
+
+    profileContent.innerHTML = profileHTML;
+}
+
+// Fungsi Logout
+function handleLogout() {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('loginTime');
+    localStorage.removeItem('loginMethod');
+    localStorage.removeItem('userProfile');
+    window.location.href = 'https://login-with-agio.web.app';
+}
+
+// Cek session saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) {
-        // Jika belum login, redirect ke halaman login
-        window.location.href = "https://login-with-agio.web.app";
-    }
-});
-
-// Fungsi untuk menampilkan profil pengguna
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Jika pengguna login, tampilkan data profil
-        const profileContent = document.getElementById('profileContent');
-        profileContent.innerHTML = `
-            <div class="text-center">
-                <img src="${user.photoURL || 'default-avatar.png'}" 
-                    class="w-32 h-32 rounded-full mx-auto mb-4"
-                    alt="Profile">
-                <h2 class="text-2xl font-bold mb-2">${user.displayName || 'User'}</h2>
-                <p class="text-gray-600">${user.email || ''}</p>
-            </div>
-        `;
+    const loginTime = localStorage.getItem('loginTime');
+    
+    // Jika tidak ada session atau session sudah kadaluarsa, redirect ke login
+    if (!isLoggedIn || (loginTime && Date.now() - loginTime > 3600000)) {
+        handleLogout();
     } else {
-        // Jika pengguna belum login, redirect ke halaman login
-        window.location.href = "https://login-with-agio.web.app";
+        loadProfile();
     }
 });
-
-// Fungsi untuk logout
-function handleLogout() {
-    auth.signOut()
-        .then(() => {
-            // Hapus status login dari localStorage
-            localStorage.removeItem('isLoggedIn');
-            // Redirect ke halaman login
-            window.location.href = "https://login-with-agio.web.app";
-        })
-        .catch((error) => {
-            console.error("Logout error:", error);
-        });
-}
