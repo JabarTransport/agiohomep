@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Pengguna - AGIO AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <style>
+    .gradient-text {
+      background: linear-gradient(45deg, #1a1b1f, #1d4ed8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #3b82f6;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Loading Overlay -->
+  <div id="loading" class="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="container mx-auto p-4 max-w-2xl">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="https://homeagio.netlify.app/" class="flex items-center space-x-2">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span class="font-semibold">Kembali ke Dashboard</span>
+      </a>
+      <button 
+        onclick="logout()"
+        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+      >
+        Logout
+      </button>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="text-center mb-8">
+        <div class="relative inline-block">
+          <img 
+            id="userAvatar"
+            src="https://via.placeholder.com/150"
+            class="w-32 h-32 rounded-full border-4 border-blue-100 mx-auto mb-4"
+            alt="Profile"
+          >
+          <div id="verifiedBadge" class="hidden absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+        <h1 id="userName" class="text-3xl font-bold gradient-text mb-2"></h1>
+        <p id="userEmail" class="text-gray-600"></p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm text-gray-500 block mb-1">Metode Autentikasi</label>
+          <p id="authMethod" class="font-medium"></p>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm text-gray-500 block mb-1">Terakhir Login</label>
+          <p id="lastLogin" class="font-medium"></p>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm text-gray-500 block mb-1">Status Akun</label>
+          <p id="accountStatus" class="font-medium"></p>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <label class="text-sm text-gray-500 block mb-1">ID Provider</label>
+          <p id="providerId" class="font-medium"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB62dgVC2BMKm7d-UjNms93SNN38BFUb4I",
+      authDomain: "login-with-agio.web.app",
+      projectId: "login-agio",
+      storageBucket: "login-agio.firebasestorage.app",
+      messagingSenderId: "1089500143018",
+      appId: "1:1089500143018:web:7b3bbaa11a0c86af989fd3",
+      measurementId: "G-WQT0VC0EBE"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Session Management
+    let loginMethod = null;
+    let userData = null;
+
+    const showContent = () => {
+      document.getElementById('loading').classList.add('hidden');
+      document.body.classList.remove('opacity-0');
+    };
+
+    const handleError = (error) => {
+      console.error(error);
+      window.location.href = 'https://login-with-agio.web.app';
+    };
+
+    const loadGitHubProfile = async (user) => {
+      // Update UI elements
+      document.getElementById('userName').textContent = user.displayName || 'Pengguna AGIO';
+      document.getElementById('userEmail').textContent = user.email;
+      document.getElementById('authMethod').textContent = 'GitHub';
+      document.getElementById('lastLogin').textContent = new Date(user.metadata.lastSignInTime).toLocaleString();
+      document.getElementById('accountStatus').textContent = user.emailVerified ? 'Terverifikasi' : 'Belum Diverifikasi';
+      document.getElementById('providerId').textContent = user.providerData[0]?.providerId || 'github.com';
+      
+      if(user.photoURL) {
+        document.getElementById('userAvatar').src = user.photoURL;
+      }
+      
+      if(user.emailVerified) {
+        document.getElementById('verifiedBadge').classList.remove('hidden');
+      }
+    };
+
+    const loadKeywordProfile = (tokenData) => {
+      document.getElementById('userName').textContent = 'Pengguna Premium';
+      document.getElementById('userEmail').textContent = 'Akses dengan Secret Key';
+      document.getElementById('authMethod').textContent = 'Secret Key';
+      document.getElementById('lastLogin').textContent = new Date(tokenData.timestamp).toLocaleString();
+      document.getElementById('accountStatus').textContent = 'Aktif';
+      document.getElementById('providerId').textContent = 'Sistem AGIO';
+      document.getElementById('userAvatar').src = 'https://i.ibb.co/3TQ6D7R/agio-logo.png';
+    };
+
+    const initializeProfile = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        loginMethod = urlParams.get('method');
+
+        if (!token || !loginMethod) {
+          throw new Error('Invalid session');
+        }
+
+        if (loginMethod === 'github') {
+          // Handle GitHub login
+          const userCredential = await auth.signInWithCustomToken(token);
+          await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+          loadGitHubProfile(userCredential.user);
+        } else if (loginMethod === 'keyword') {
+          // Handle Keyword login
+          const tokenData = JSON.parse(atob(token));
+          if (Date.now() > tokenData.exp) {
+            throw new Error('Sesi telah kedaluwarsa');
+          }
+          loadKeywordProfile(tokenData);
+        }
+
+        // Clean URL after successful load
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showContent();
+      } catch (error) {
+        handleError(error);
+      }
+    };
+
+    const logout = () => {
+      auth.signOut().then(() => {
+        window.location.href = 'https://login-with-agio.web.app';
+      }).catch(handleError);
+    };
+
+    // Start initialization
+    auth.onAuthStateChanged(() => {
+      initializeProfile();
+    });
+  </script>
+</body>
+</html>
