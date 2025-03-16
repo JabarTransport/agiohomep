@@ -79,7 +79,7 @@
       const token = localStorage.getItem('authToken');
 
       if (!method || !token) {
-        window.location.href = 'https://loginagio';
+        window.location.href = 'https://login-with-agio.web.app';
         return;
       }
 
@@ -91,7 +91,7 @@
             document.getElementById('userEmail').textContent = user.email || 'N/A';
             document.getElementById('loginMethod').textContent = 'GitHub';
           } else {
-            window.location.href = 'https://loginagio';
+            window.location.href = 'https://login-with-agio.web.app';
           }
         });
       } else if (method === 'keyword') {
@@ -107,7 +107,7 @@
       auth.signOut().then(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('loginMethod');
-        window.location.href = 'https://loginagio';
+        window.location.href = 'https://login-with-agio.web.app';
       }).catch((error) => {
         console.error('Logout error:', error);
       });
