@@ -57,7 +57,7 @@
       const method = localStorage.getItem('loginMethod');
 
       if (!token || !method) {
-        window.location.href = 'https://login-with-agio.web.app';
+        window.location.href = 'https://loginagio.netlify.app/';
         return;
       }
 
@@ -68,7 +68,7 @@
             document.getElementById('userEmail').textContent = user.email || 'N/A';
             document.getElementById('loginMethod').textContent = 'GitHub';
           } else {
-            window.location.href = 'https://login-with-agio.web.app';
+            window.location.href = 'https://loginagio.netlify.app/';
           }
         });
       } else if (method === 'keyword') {
@@ -83,7 +83,7 @@
       auth.signOut().then(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('loginMethod');
-        window.location.href = 'https://login-with-agio.web.app';
+        window.location.href = 'https://loginagio.netlify.app/';
       });
     };
 
